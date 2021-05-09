@@ -80,3 +80,12 @@ def test_send_newsletter_text_template_is_empty(initialiseWithEmptyTextTemplate)
             "newsletter_subject": "Meadow Testing Newsletter",
         }
         send_newsletter(event, None)
+
+
+def test_send_newsletter_cannot_load_subscribers(initialiseWithIncorrectIndex):
+    with pytest.raises(Exception, match="Could not load subscribers from users table"):
+        event = {
+            "newsletter_slug": "20210421",
+            "newsletter_subject": "Meadow Testing Newsletter",
+        }
+        send_newsletter(event, None)

@@ -94,7 +94,7 @@ def signup(event, context):
             meadow["barn"], "transactional/validate.j2"
         )
     except Exception as error:
-        logger.info("Could not load template: %s", error)
+        logger.info("Could not load template: ", error)
         raise error
 
     validation_url = (
@@ -282,7 +282,7 @@ def send_newsletter(event, context):
             meadow["barn"], "newsletters/" + newsletter_slug + ".j2"
         )
     except Exception as error:
-        logger.info("Could not load template: %s", error)
+        logger.info("Could not load template: ", error)
         raise error
 
     # Load subscribers from users table
@@ -291,9 +291,9 @@ def send_newsletter(event, context):
             IndexName="is_subscribed",
             KeyConditionExpression=Key("is_subscribed").eq("true"),
         )
-    except KeyError as error:
+    except botocore.exceptions.ClientError as error:
         logger.info("Could not load subscribers from users table")
-        raise error
+        raise Exception("Could not load subscribers from users table", error)
 
     # Set common newsletter attributes
     email_sent_date = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -340,7 +340,7 @@ def send_newsletter(event, context):
                 table,
             )
         except botocore.exceptions.ClientError as error:
-            logger.info("Could not send newsletter: %s", error)
+            logger.info("Could not send newsletter: ", error)
             continue
 
     return 0
