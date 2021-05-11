@@ -2,6 +2,8 @@ import boto3
 import pytest
 from moto import mock_dynamodb2, mock_s3, mock_ses, mock_ssm
 
+# Refactor the fixtures in this class to avoid code duplication
+
 
 @pytest.fixture(scope="function")
 def initialise():
@@ -267,25 +269,11 @@ def initialiseWithoutSes():
     # Mock endpoints
     mockdynamodb2 = mock_dynamodb2()
     mockssm = mock_ssm()
+    mockses = mock_ses()
     mocks3 = mock_s3()
 
-    # Start endpoints
-    mockdynamodb2.start()
-    mockssm.start()
-    mocks3.start()
-    boto3.setup_default_session()
-
-    # Create mock SSM
-    ssm = boto3.client("ssm", region_name="us-east-1")
-    ssm.put_parameter(
-        Name="MeadowDictionary",
-        Value=(
-            '{ "organisation": "Meadow Testing","table": "meadow-users", '
-            '"meadow_domain": "meadow.test", "website_domain": "test", '
-            '"region": "us-east-1", "honeypot_secret": "11111111", "barn": "my-barn" }'
-        ),
-        Type="String",
-    )
+    # Start endpoints. Mock SES users, DynamoDB table and SSM
+    ssm, ses = baseInitialise(mockdynamodb2, mockssm, mockses, mocks3)
 
     # Create mock users DynamoDB table
     ddb = mockDynamoDBTable()
@@ -312,6 +300,7 @@ def initialiseWithoutSes():
     # Stop endpoints
     mockdynamodb2.stop()
     mockssm.stop()
+    mockses.stop()
     mocks3.stop()
 
 
