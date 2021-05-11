@@ -3,6 +3,15 @@ import pytest
 from handlers.handler import send_newsletter
 
 
+def subscriber_record() -> dict:
+    return {
+        "partitionKey": {"S": "test@test.test"},
+        "sortKey": {"S": "EMAIL_SENT#20210226010203"},
+        "random_string": {"S": "12345678"},
+        "is_subscribed": {"S": "true"},
+    }
+
+
 def test_send_newsletter_happy_path(initialise):
     event = {
         "newsletter_slug": "20210421",
@@ -89,3 +98,23 @@ def test_send_newsletter_cannot_load_subscribers(initialiseWithIncorrectIndex):
             "newsletter_subject": "Meadow Testing Newsletter",
         }
         send_newsletter(event, None)
+
+
+def test_send_newsletter_email_send_fails_without_raising_error(initialiseWithoutSes):
+    ddb = initialiseWithoutSes[0]
+    # Populate with test user
+    ddb.put_item(
+        TableName="meadow-users",
+        Item=subscriber_record(),
+    )
+    ddb.put_item(
+        TableName="meadow-users",
+        Item=subscriber_record(),
+    )
+    event = {
+        "newsletter_slug": "20210421",
+        "newsletter_subject": "Meadow Testing Newsletter",
+    }
+    # Send fails but we expect no exception to be raised, only logged.
+    response = send_newsletter(event, None)
+    assert response == 0

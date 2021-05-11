@@ -262,6 +262,59 @@ def initialiseWithIncorrectIndex():
     mocks3.stop()
 
 
+@pytest.fixture(scope="function")
+def initialiseWithoutSes():
+    # Mock endpoints
+    mockdynamodb2 = mock_dynamodb2()
+    mockssm = mock_ssm()
+    mocks3 = mock_s3()
+
+    # Start endpoints
+    mockdynamodb2.start()
+    mockssm.start()
+    mocks3.start()
+    boto3.setup_default_session()
+
+    # Create mock SSM
+    ssm = boto3.client("ssm", region_name="us-east-1")
+    ssm.put_parameter(
+        Name="MeadowDictionary",
+        Value=(
+            '{ "organisation": "Meadow Testing","table": "meadow-users", '
+            '"meadow_domain": "meadow.test", "website_domain": "test", '
+            '"region": "us-east-1", "honeypot_secret": "11111111", "barn": "my-barn" }'
+        ),
+        Type="String",
+    )
+
+    # Create mock users DynamoDB table
+    ddb = mockDynamoDBTable()
+
+    # Create mock s3 barn
+    mock_email = """
+    Did you sign up to this newsletter?
+    If so, follow this path: {{ validation_path }}
+
+    To unsubscribe, click here: {{ unsubscribe_path }}
+    ---TEXT-HTML-SEPARATOR---
+    Did you sign up to this newsletter?
+    If so, follow this path: {{ validation_path }}
+
+    To unsubscribe, click here: {{ unsubscribe_path }}
+    """.encode(
+        "utf-8"
+    )
+
+    s3 = mockBarn(mock_email)
+
+    yield ddb, ssm, s3
+
+    # Stop endpoints
+    mockdynamodb2.stop()
+    mockssm.stop()
+    mocks3.stop()
+
+
 def baseInitialise(mockdynamodb2, mockssm, mockses, mocks3):
     # Start endpoints
     mockdynamodb2.start()
