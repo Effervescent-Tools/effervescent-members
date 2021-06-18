@@ -60,8 +60,7 @@ ci-tests: # Runs feature tests in CircleCI
 	echo $$GMAIL_CLIENT_SECRET > client_secret.json
 	mkdir test-results
 	BARN_BUCKET=$(shell cat barn_bucket) .venv/bin/pytest tests/features --junitxml=test-results/features.xml
-#	cd handlers;../.venv/bin/pytest ../tests/unit --junitxml=../test-results/unit.xml
-## Unit tests disabled pending moto bugfix https://github.com/spulec/moto/pull/3763
+	cd handlers;../.venv/bin/pytest ../tests/unit --junitxml=../test-results/unit.xml
 
 .bin/terraform: # Installs Terraform
 	mkdir -p tests/.bin

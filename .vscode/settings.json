@@ -1,0 +1,5 @@
+{
+    "python.pythonPath": ".venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.analysis.extraPaths": ["handlers", ".venv/lib/python3.9/site-packages", ".venv/lib64/python3.9/site-packages"]
+}

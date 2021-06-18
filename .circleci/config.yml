@@ -15,10 +15,9 @@ jobs:
           name: Run conformity tests
           command: make conformity-tests
 
-      #- run:
-      #    name: Run unit tests
-      #    command: make unit-tests
-      ## Unit tests disabled pending moto bugfix https://github.com/spulec/moto/pull/3763
+      - run:
+          name: Run unit tests
+          command: make unit-tests
 
       - run:
           name: Deploy Meadow
